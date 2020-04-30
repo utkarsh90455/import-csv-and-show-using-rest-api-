@@ -5,3 +5,6 @@ class csvDataSerializers(serializers.ModelSerializer):
     class Meta:
         model=csvData
         fields='__all__'
+
+
+

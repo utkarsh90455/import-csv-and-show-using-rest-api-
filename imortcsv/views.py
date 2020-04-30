@@ -2,6 +2,7 @@ import csv, io
 from django.shortcuts import render
 from django.contrib import messages
 from rest_framework.views import APIView
+from rest_framework import status
 from rest_framework.response import Response
 from .serializer import csvDataSerializers
 from .models import csvData
@@ -69,9 +70,16 @@ def csv_search(request):
 
 class csvApi(APIView):
     def get(self,request):
-        query_text = request.GET['query']
+        query_text = request.GET.get('query','')
         data = csvData.objects.filter(Message__contains=query_text)
         serializer=csvDataSerializers(data,many=True)
         return Response(serializer.data)
-    def post(self):
-        pass
+    def post(self,request):
+        data=request.data
+        serializer=csvDataSerializers(data=data,many=True)
+        if serializer.is_valid():
+            serializer.save()
+            data={}
+            data['message']="Succesfully Created"
+            return Response(data)
+        Response(serializer.error_messages,status=status.HTTP_400_BAD_REQUEST)
